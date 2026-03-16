@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using TMPro;
+using System;
+using CodeMonkey.Utils;
 
 public class ItemWorld : MonoBehaviour
 {
@@ -35,11 +38,32 @@ public class ItemWorld : MonoBehaviour
     private Item item;
     private SpriteRenderer spriteRenderer;
     private Light2D light2D;
+    private TextMeshPro textMeshPro;
+    private float canBePickedUpTimer;
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         light2D = GetComponent<Light2D>();
+        textMeshPro = transform.Find("Amount").GetComponent<TextMeshPro>();
+    }
+
+    private void Update()
+    {
+        if (canBePickedUpTimer > 0f)
+        {
+            canBePickedUpTimer -= Time.deltaTime;
+        }
+    }
+
+    public void SetCanBePickedUpTimer(float time)
+    {
+        canBePickedUpTimer = time;
+    }
+
+    public bool CanBePickedUp()
+    {
+        return canBePickedUpTimer <= 0f;
     }
 
     public void SetItem(Item item)
@@ -58,6 +82,17 @@ public class ItemWorld : MonoBehaviour
         {
             light2D.color = item.GetColor();
         }
+        if (textMeshPro != null)
+        {
+            if (item.amount > 1)
+            {
+                textMeshPro.SetText(item.amount.ToString());
+            }
+            else
+            {
+                textMeshPro.SetText("");
+            }
+        }
     }
 
     public Item GetItem()
@@ -68,5 +103,23 @@ public class ItemWorld : MonoBehaviour
     public void DestroySelf()
     {
         Destroy(gameObject);
+    }
+
+    internal static ItemWorld DropItem(Vector3 dropPosition, Item item)
+    {
+        Vector3 randomDir = UtilsClass.GetRandomDir();
+
+        ItemWorld itemWorld = SpawnItemWorld(dropPosition + randomDir * 1.1f, item);
+        itemWorld.SetCanBePickedUpTimer(0.25f);
+
+        Rigidbody2D rb = itemWorld.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+            rb.AddForce(randomDir * 3.5f, ForceMode2D.Impulse);
+        }
+
+        return itemWorld;
     }
 }

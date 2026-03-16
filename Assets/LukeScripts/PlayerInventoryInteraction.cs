@@ -1,23 +1,114 @@
+using System.Collections;
 using UnityEngine;
 
-public class PlayerInventoryInteraction : MonoBehaviour {
+public class PlayerInventoryInteraction : MonoBehaviour
+{
     private Inventory inventory;
     [SerializeField] private UI_Inventory uiInventory;
+    private SpriteRenderer playerSpriteRenderer;
 
-    void Awake()
+    private void Awake()
     {
-        inventory = new Inventory();
+
+        inventory = new Inventory(UseItem);
+        uiInventory.SetPlayer(this);
         uiInventory.SetInventory(inventory);
+
+        playerSpriteRenderer = transform.Find("PlayerSprite").GetComponent<SpriteRenderer>();
+    }
+
+    public Vector3 GetPosition()
+    {
+        return transform.position;
+    }
+
+    private void UseItem(Item item)
+    {
+        switch (item.itemType)
+        {
+            case Item.ItemType.HealthPill:
+                FlashGreen();
+                inventory.RemoveOneItem(item);
+                break;
+
+            case Item.ItemType.AnotherPill:
+                FlashBlue();
+                inventory.RemoveOneItem(item);
+                break;
+
+            case Item.ItemType.Medkit:
+                FlashPink();
+                inventory.RemoveOneItem(item);
+                break;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collider)
     {
         ItemWorld itemWorld = collider.GetComponent<ItemWorld>();
-        if(itemWorld != null)
+        if (itemWorld != null && itemWorld.CanBePickedUp())
         {
-            // Touching Item
             inventory.AddItem(itemWorld.GetItem());
             itemWorld.DestroySelf();
         }
+    }
+    private Coroutine flashCoroutine;
+
+    private void StartFlash(Color targetColor)
+    {
+        if (flashCoroutine != null)
+        {
+            StopCoroutine(flashCoroutine);
+        }
+
+        flashCoroutine = StartCoroutine(FlashSmooth(targetColor));
+    }
+    private IEnumerator FlashSmooth(Color flashColor)
+    {
+        Color originalColor = playerSpriteRenderer.color;
+
+        float flashInTime = 0.10f;
+        float flashOutTime = 0.45f;
+
+        float timer = 0f;
+
+        while (timer < flashInTime)
+        {
+            timer += Time.deltaTime;
+            float t = timer / flashInTime;
+            t = 1f - Mathf.Pow(1f - t, 3f);
+            playerSpriteRenderer.color = Color.Lerp(originalColor, flashColor, t);
+            yield return null;
+        }
+
+        playerSpriteRenderer.color = flashColor;
+
+        timer = 0f;
+
+        while (timer < flashOutTime)
+        {
+            timer += Time.deltaTime;
+            float t = timer / flashOutTime;
+            t = t * t;
+            playerSpriteRenderer.color = Color.Lerp(flashColor, originalColor, t);
+            yield return null;
+        }
+
+        playerSpriteRenderer.color = originalColor;
+        flashCoroutine = null;
+    }
+    public void FlashGreen()
+    {
+        StartFlash(new Color(0.4f, 1f, 0.4f));
+    }
+
+    public void FlashBlue()
+    {
+        StartFlash(new Color(0.4f, 0.4f, 1f));
+    }
+
+    public void FlashPink()
+    {
+        StartFlash(new Color(1f, 0.4f, 0.8f));
     }
 }

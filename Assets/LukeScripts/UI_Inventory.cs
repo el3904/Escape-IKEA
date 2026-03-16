@@ -2,12 +2,14 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using CodeMonkey.Utils;
 
 public class UI_Inventory : MonoBehaviour
 {
     private Inventory inventory;
     private Transform itemSlotContainer;
     private Transform itemSlotTemplate;
+    private PlayerInventoryInteraction player;
 
     private void Awake()
     {
@@ -15,6 +17,11 @@ public class UI_Inventory : MonoBehaviour
         itemSlotTemplate = itemSlotContainer.Find("itemSlotTemplate");
 
         itemSlotTemplate.gameObject.SetActive(false);
+    }
+
+    public void SetPlayer(PlayerInventoryInteraction player)
+    {
+        this.player = player;
     }
 
     public void SetInventory(Inventory inventory)
@@ -49,8 +56,26 @@ public class UI_Inventory : MonoBehaviour
                 Instantiate(itemSlotTemplate, itemSlotContainer).GetComponent<RectTransform>();
 
             itemSlotRectTransform.gameObject.SetActive(true);
-            itemSlotRectTransform.anchoredPosition = new Vector2(x * itemSlotCellSize, -y * itemSlotCellSize);
 
+            Button_UI buttonUI = itemSlotRectTransform.GetComponent<Button_UI>();
+            if (buttonUI == null)
+            {
+                return;
+            }
+
+            buttonUI.ClickFunc = () => {
+                // Use item
+                inventory.UseItem(item);
+            };
+
+            buttonUI.MouseRightClickFunc = () => {
+                // Drop item
+                Item duplicateItem = new Item { itemType = item.itemType, amount = item.amount };
+                inventory.RemoveItem(item);
+                ItemWorld.DropItem(player.GetPosition(), duplicateItem);
+            };
+
+            itemSlotRectTransform.anchoredPosition = new Vector2(x * itemSlotCellSize, -y * itemSlotCellSize);
             Transform imageTransform = itemSlotRectTransform.Find("image");
             Image image = imageTransform.GetComponent<Image>();
             image.sprite = item.GetSprite();
