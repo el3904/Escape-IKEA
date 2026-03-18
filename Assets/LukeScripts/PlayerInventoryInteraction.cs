@@ -7,14 +7,17 @@ public class PlayerInventoryInteraction : MonoBehaviour
     [SerializeField] private UI_Inventory uiInventory;
     private SpriteRenderer playerSpriteRenderer;
 
+    private Coroutine flashCoroutine;
+    private Color baseColor;
+
     private void Awake()
     {
-
         inventory = new Inventory(UseItem);
         uiInventory.SetPlayer(this);
         uiInventory.SetInventory(inventory);
 
         playerSpriteRenderer = transform.Find("PlayerSprite").GetComponent<SpriteRenderer>();
+        baseColor = playerSpriteRenderer.color;
     }
 
     public Vector3 GetPosition()
@@ -52,21 +55,20 @@ public class PlayerInventoryInteraction : MonoBehaviour
             itemWorld.DestroySelf();
         }
     }
-    private Coroutine flashCoroutine;
 
     private void StartFlash(Color targetColor)
     {
         if (flashCoroutine != null)
         {
             StopCoroutine(flashCoroutine);
+            playerSpriteRenderer.color = baseColor; // force return to original color
         }
 
         flashCoroutine = StartCoroutine(FlashSmooth(targetColor));
     }
+
     private IEnumerator FlashSmooth(Color flashColor)
     {
-        Color originalColor = playerSpriteRenderer.color;
-
         float flashInTime = 0.10f;
         float flashOutTime = 0.45f;
 
@@ -77,7 +79,7 @@ public class PlayerInventoryInteraction : MonoBehaviour
             timer += Time.deltaTime;
             float t = timer / flashInTime;
             t = 1f - Mathf.Pow(1f - t, 3f);
-            playerSpriteRenderer.color = Color.Lerp(originalColor, flashColor, t);
+            playerSpriteRenderer.color = Color.Lerp(baseColor, flashColor, t);
             yield return null;
         }
 
@@ -90,13 +92,14 @@ public class PlayerInventoryInteraction : MonoBehaviour
             timer += Time.deltaTime;
             float t = timer / flashOutTime;
             t = t * t;
-            playerSpriteRenderer.color = Color.Lerp(flashColor, originalColor, t);
+            playerSpriteRenderer.color = Color.Lerp(flashColor, baseColor, t);
             yield return null;
         }
 
-        playerSpriteRenderer.color = originalColor;
+        playerSpriteRenderer.color = baseColor;
         flashCoroutine = null;
     }
+
     public void FlashGreen()
     {
         StartFlash(new Color(0.4f, 1f, 0.4f));
