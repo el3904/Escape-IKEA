@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
-using Unity.VisualScripting;
 
 public class Inventory
 {
@@ -13,17 +12,41 @@ public class Inventory
     {
         this.useItemAction = useItemAction;
         itemList = new List<Item>();
+    }
+    public int GetTotalAmountByDefinition(ItemDefinition definition)
+    {
+        int total = 0;
 
-        //AddItem(new Item { itemType = Item.ItemType.SpeedPill, amount = 1 });
-        //Add Default Items Here
-        this.useItemAction = useItemAction;
+        foreach (Item item in itemList)
+        {
+            if (item != null && item.definition == definition)
+            {
+                total += item.amount;
+            }
+        }
+
+        return total;
+    }
+    public void RemoveAllByDefinition(ItemDefinition definition)
+    {
+        if (definition == null) return;
+
+        for (int i = itemList.Count - 1; i >= 0; i--)
+        {
+            if (itemList[i] != null && itemList[i].definition == definition)
+            {
+                itemList.RemoveAt(i);
+            }
+        }
+
+        OnItemListChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public Item FindFirstItemByType(Item.ItemType itemType)
+    public Item FindFirstItemByDefinition(ItemDefinition definition)
     {
         foreach (Item item in itemList)
         {
-            if (item.itemType == itemType)
+            if (item.definition == definition)
             {
                 return item;
             }
@@ -34,18 +57,22 @@ public class Inventory
 
     public void AddItem(Item item)
     {
-        
+        if (item == null || item.definition == null) return;
+
         if (item.IsStackable())
         {
             bool itemAlreadyInInventory = false;
+
             foreach (Item inventoryItem in itemList)
             {
-                if(inventoryItem.itemType == item.itemType)
+                if (inventoryItem.definition == item.definition)
                 {
                     inventoryItem.amount += item.amount;
                     itemAlreadyInInventory = true;
+                    break;
                 }
             }
+
             if (!itemAlreadyInInventory)
             {
                 itemList.Add(item);
@@ -55,6 +82,7 @@ public class Inventory
         {
             itemList.Add(item);
         }
+
         OnItemListChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -65,7 +93,7 @@ public class Inventory
 
     public void InsertItemAt(Item item, int index)
     {
-        if (item == null) return;
+        if (item == null || item.definition == null) return;
 
         if (item.IsStackable())
         {
@@ -73,7 +101,7 @@ public class Inventory
 
             foreach (Item inventoryItem in itemList)
             {
-                if (inventoryItem.itemType == item.itemType)
+                if (inventoryItem.definition == item.definition)
                 {
                     inventoryItem.amount += item.amount;
                     itemAlreadyInInventory = true;
@@ -108,17 +136,22 @@ public class Inventory
 
     public void RemoveItem(Item item)
     {
+        if (item == null || item.definition == null) return;
+
         if (item.IsStackable())
         {
             Item itemInInventory = null;
+
             foreach (Item inventoryItem in itemList)
             {
-                if (inventoryItem.itemType == item.itemType)
+                if (inventoryItem.definition == item.definition)
                 {
                     inventoryItem.amount -= item.amount;
                     itemInInventory = inventoryItem;
+                    break;
                 }
             }
+
             if (itemInInventory != null && itemInInventory.amount <= 0)
             {
                 itemList.Remove(itemInInventory);
@@ -128,11 +161,14 @@ public class Inventory
         {
             itemList.Remove(item);
         }
+
         OnItemListChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void RemoveOneItem(Item item)
     {
+        if (item == null) return;
+
         if (item.IsStackable())
         {
             item.amount--;

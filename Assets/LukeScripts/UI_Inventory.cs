@@ -180,7 +180,12 @@ public class UI_Inventory : MonoBehaviour
 
             buttonUI.MouseRightClickFunc = () =>
             {
-                Item duplicateItem = new Item { itemType = item.itemType, amount = item.amount };
+                Item duplicateItem = new Item
+                {
+                    definition = item.definition,
+                    amount = item.amount
+                };
+
                 inventory.RemoveItem(item);
                 ItemWorld.DropItem(player.GetPosition(), duplicateItem);
             };

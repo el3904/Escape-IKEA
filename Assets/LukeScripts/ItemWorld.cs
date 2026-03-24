@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using TMPro;
-using System;
 using CodeMonkey.Utils;
 
 public class ItemWorld : MonoBehaviour
@@ -46,7 +45,13 @@ public class ItemWorld : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         light2D = GetComponent<Light2D>();
-        textMeshPro = transform.Find("Amount").GetComponent<TextMeshPro>();
+
+        Transform amountTransform = transform.Find("Amount");
+        if (amountTransform != null)
+        {
+            textMeshPro = amountTransform.GetComponent<TextMeshPro>();
+        }
+
         defaultScale = transform.localScale;
     }
 
@@ -72,6 +77,12 @@ public class ItemWorld : MonoBehaviour
     {
         this.item = item;
 
+        if (item == null || item.definition == null)
+        {
+            Debug.LogError("Item or ItemDefinition is null!", this);
+            return;
+        }
+
         if (spriteRenderer == null)
         {
             Debug.LogError("SpriteRenderer missing on ItemWorld prefab!", this);
@@ -79,26 +90,13 @@ public class ItemWorld : MonoBehaviour
         }
 
         spriteRenderer.sprite = item.GetSprite();
-
-        // og prefab size
         transform.localScale = defaultScale;
+
         if (light2D != null)
         {
             light2D.color = item.GetColor();
-
-            switch (item.itemType)
-            {
-                case Item.ItemType.Axe:
-                case Item.ItemType.Armor:
-                    light2D.intensity = 1.4f;
-                    light2D.pointLightOuterRadius = 1.2f;
-                    break;
-
-                default:
-                    light2D.intensity = 1f;
-                    light2D.pointLightOuterRadius = 1f;
-                    break;
-            }
+            light2D.intensity = 1f;
+            light2D.pointLightOuterRadius = 1f;
         }
 
         if (textMeshPro != null)
@@ -129,6 +127,8 @@ public class ItemWorld : MonoBehaviour
         Vector3 randomDir = UtilsClass.GetRandomDir();
 
         ItemWorld itemWorld = SpawnItemWorld(dropPosition + randomDir * 1.1f, item);
+        if (itemWorld == null) return null;
+
         itemWorld.SetCanBePickedUpTimer(0.25f);
 
         Rigidbody2D rb = itemWorld.GetComponent<Rigidbody2D>();

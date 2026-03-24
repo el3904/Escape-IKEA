@@ -9,25 +9,40 @@ public class ToggleInventory : MonoBehaviour
 
     private void Start()
     {
-        uiRoot.SetActive(false);
-
-        if (utilityQuickSlot != null)
-        {
-            utilityQuickSlot.SetActive(true);
-        }
+        SetInventoryState(false);
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            isOpen = !isOpen;
-            uiRoot.SetActive(isOpen);
+            SetInventoryState(!isOpen);
+        }
+    }
 
-            if (utilityQuickSlot != null)
-            {
-                utilityQuickSlot.SetActive(!isOpen);
-            }
+    private void SetInventoryState(bool open)
+    {
+        isOpen = open;
+
+        if (uiRoot != null)
+        {
+            uiRoot.SetActive(isOpen);
+        }
+
+        if (utilityQuickSlot != null)
+        {
+            utilityQuickSlot.SetActive(!isOpen);
+        }
+
+        if (isOpen)
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
         }
     }
 }
