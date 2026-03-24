@@ -14,8 +14,22 @@ public class Inventory
         this.useItemAction = useItemAction;
         itemList = new List<Item>();
 
-        AddItem(new Item { itemType = Item.ItemType.SpeedPill, amount = 1 });
+        //AddItem(new Item { itemType = Item.ItemType.SpeedPill, amount = 1 });
+        //Add Default Items Here
         this.useItemAction = useItemAction;
+    }
+
+    public Item FindFirstItemByType(Item.ItemType itemType)
+    {
+        foreach (Item item in itemList)
+        {
+            if (item.itemType == itemType)
+            {
+                return item;
+            }
+        }
+
+        return null;
     }
 
     public void AddItem(Item item)
@@ -41,6 +55,44 @@ public class Inventory
         {
             itemList.Add(item);
         }
+        OnItemListChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public int GetItemIndex(Item item)
+    {
+        return itemList.IndexOf(item);
+    }
+
+    public void InsertItemAt(Item item, int index)
+    {
+        if (item == null) return;
+
+        if (item.IsStackable())
+        {
+            bool itemAlreadyInInventory = false;
+
+            foreach (Item inventoryItem in itemList)
+            {
+                if (inventoryItem.itemType == item.itemType)
+                {
+                    inventoryItem.amount += item.amount;
+                    itemAlreadyInInventory = true;
+                    break;
+                }
+            }
+
+            if (!itemAlreadyInInventory)
+            {
+                index = Mathf.Clamp(index, 0, itemList.Count);
+                itemList.Insert(index, item);
+            }
+        }
+        else
+        {
+            index = Mathf.Clamp(index, 0, itemList.Count);
+            itemList.Insert(index, item);
+        }
+
         OnItemListChanged?.Invoke(this, EventArgs.Empty);
     }
 

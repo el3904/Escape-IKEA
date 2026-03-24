@@ -40,12 +40,14 @@ public class ItemWorld : MonoBehaviour
     private Light2D light2D;
     private TextMeshPro textMeshPro;
     private float canBePickedUpTimer;
+    private Vector3 defaultScale;
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         light2D = GetComponent<Light2D>();
         textMeshPro = transform.Find("Amount").GetComponent<TextMeshPro>();
+        defaultScale = transform.localScale;
     }
 
     private void Update()
@@ -78,10 +80,27 @@ public class ItemWorld : MonoBehaviour
 
         spriteRenderer.sprite = item.GetSprite();
 
+        // og prefab size
+        transform.localScale = defaultScale;
         if (light2D != null)
         {
             light2D.color = item.GetColor();
+
+            switch (item.itemType)
+            {
+                case Item.ItemType.Axe:
+                case Item.ItemType.Armor:
+                    light2D.intensity = 1.4f;
+                    light2D.pointLightOuterRadius = 1.2f;
+                    break;
+
+                default:
+                    light2D.intensity = 1f;
+                    light2D.pointLightOuterRadius = 1f;
+                    break;
+            }
         }
+
         if (textMeshPro != null)
         {
             if (item.amount > 1)

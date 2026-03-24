@@ -26,13 +26,13 @@ public class UI_Inventory : MonoBehaviour
         itemSlotTemplate.gameObject.SetActive(false);
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            UseFirstItem();
-        }
-    }
+    //private void Update()
+    //{
+    //    if (Input.GetKeyDown(KeyCode.K))
+    //    {
+    //        UseFirstItem();
+    //    }
+    //}
 
     public void SetPlayer(PlayerInventoryInteraction player)
     {
@@ -53,25 +53,25 @@ public class UI_Inventory : MonoBehaviour
         RefreshInventoryItems();
     }
 
-    private void UseFirstItem()
-    {
-        if (inventory == null) return;
+    //private void UseFirstItem()
+    //{
+    //    if (inventory == null) return;
 
-        var itemList = inventory.GetItemList();
+    //    var itemList = inventory.GetItemList();
 
-        if (itemList.Count > 0)
-        {
-            Item item = itemList[0];
+    //    if (itemList.Count > 0)
+    //    {
+    //        Item item = itemList[0];
 
-            if (item.itemType == Item.ItemType.SpeedPill)
-            {
+    //        if (item.itemType == Item.ItemType.SpeedPill)
+    //        {
 
-               playerMovement.BoostSpeedFor10Seconds();
-            }
+    //           playerMovement.BoostSpeedFor10Seconds();
+    //        }
 
-            inventory.UseItem(item);
-        }
-    }
+    //        inventory.UseItem(item);
+    //    }
+    //}
 
     //private void RefreshInventoryItems()
     //{

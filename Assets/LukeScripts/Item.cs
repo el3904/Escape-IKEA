@@ -11,44 +11,54 @@ public class Item
         SpeedPill,
         Coin,
         Medkit,
+        Armor,
+        Axe,
     }
 
     public ItemType itemType;
     public int amount;
 
+    public Item Clone()
+    {
+        return new Item
+        {
+            itemType = this.itemType,
+            amount = this.amount
+        };
+    }
+
     public Sprite GetSprite()
     {
-        switch (itemType)
-        {
-            default:
-            case ItemType.Sword: 
-                return ItemAssets.Instance.swordSprite;
-            case ItemType.HealthPill: 
-                return ItemAssets.Instance.healthPillSprite;
-            case ItemType.SpeedPill: 
-                return ItemAssets.Instance.anotherPillSprite;
-            case ItemType.Coin: 
-                return ItemAssets.Instance.coinSprite;
-            case ItemType.Medkit: 
-                return ItemAssets.Instance.medkitSprite;
-        }
+        return ItemAssets.Instance.GetSprite(itemType);
     }
 
     public float GetUIScale()
     {
         switch (itemType)
         {
-            default:
             case ItemType.Sword:
                 return 1f;
+
+            case ItemType.Axe:
+                return 0.74f;
+
+            case ItemType.Armor:
+                return 0.8f;
+
             case ItemType.HealthPill:
                 return 0.75f;
+
             case ItemType.SpeedPill:
                 return 0.75f;
+
             case ItemType.Coin:
                 return 0.65f;
+
             case ItemType.Medkit:
                 return 0.8f;
+
+            default:
+                return 1f;
         }
     }
 
@@ -56,17 +66,27 @@ public class Item
     {
         switch (itemType)
         {
-            default:
             case ItemType.Sword:
-                return new Color(1, 1, 1);
+                return new Color(1f, 1f, 1f);
+
+            case ItemType.Axe:
+            case ItemType.Armor:
+                return new Color(0.85f, 0.9f, 1f);
+
             case ItemType.HealthPill:
-                return new Color(1, 0, 0);
+                return new Color(1f, 0f, 0f);
+
             case ItemType.SpeedPill:
-                return new Color(0, 0, 1);
+                return new Color(0f, 0f, 1f);
+
             case ItemType.Coin:
-                return new Color(1, 1, 0);
+                return new Color(1f, 1f, 0f);
+
             case ItemType.Medkit:
-                return new Color(1, 0, 0.75f);
+                return new Color(1f, 0f, 0.75f);
+
+            default:
+                return Color.white;
         }
     }
 
@@ -74,15 +94,19 @@ public class Item
     {
         switch (itemType)
         {
-            default:
             case ItemType.Coin:
             case ItemType.HealthPill:
             case ItemType.SpeedPill:
                 return true;
+
             case ItemType.Sword:
+            case ItemType.Axe:
+            case ItemType.Armor:
             case ItemType.Medkit:
+                return false;
+
+            default:
                 return false;
         }
     }
-
 }
